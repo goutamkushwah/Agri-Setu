@@ -1,0 +1,47 @@
+const jwt = require('jsonwebtoken');
+
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+    throw new Error('JWT_SECRET and JWT_REFRESH_SECRET must be set in production (.env)');
+  }
+}
+
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  (process.env.NODE_ENV === 'production' ? undefined : 'dev-only-set-JWT_SECRET-in-env');
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET ||
+  (process.env.NODE_ENV === 'production' ? undefined : 'dev-only-set-JWT_REFRESH_SECRET-in-env');
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+
+const generateToken = (payload) => {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN
+  });
+};
+
+const generateRefreshToken = (payload) => {
+  return jwt.sign(payload, JWT_REFRESH_SECRET, {
+    expiresIn: JWT_REFRESH_EXPIRES_IN
+  });
+};
+
+const verifyToken = (token) => {
+  return jwt.verify(token, JWT_SECRET);
+};
+
+const verifyRefreshToken = (token) => {
+  return jwt.verify(token, JWT_REFRESH_SECRET);
+};
+
+module.exports = {
+  generateToken,
+  generateRefreshToken,
+  verifyToken,
+  verifyRefreshToken,
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+  JWT_REFRESH_SECRET,
+  JWT_REFRESH_EXPIRES_IN
+};
